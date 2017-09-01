@@ -16,7 +16,6 @@ RUN ./3-zgrviewer.sh
 
 ADD ./parts/4-dlib.sh ./4-dlib.sh
 RUN chmod +x ./4-dlib.sh
-RUN ./4-dlib.sh
 
 ADD ./parts/5-bash.sh ./5-bash.sh
 RUN chmod +x ./5-bash.sh
