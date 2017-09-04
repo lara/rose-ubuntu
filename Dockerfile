@@ -1,40 +1,86 @@
-FROM ubuntu
+FROM ubuntu:xenial
 
-ADD ./parts/1-deps.sh ./1-deps.sh
-RUN chmod +x ./1-deps.sh
-RUN ./1-deps.sh
+####################################################################################################
+# Folder structure
+#
+# /rose
+#   /source
+#   /build
+#   /installation
+#   /boost
+####################################################################################################
 
-ADD ./parts/2-boost.sh ./2-boost.sh
-RUN chmod +x ./2-boost.sh
-RUN ./2-boost.sh
+ENV ROSE_BASE /rose
+ENV ROSE_SOURCE $ROSE_BASE/source
+ENV ROSE_BUILD $ROSE_BASE/build
+ENV ROSE_INSTALLATION $ROSE_BASE/installation
+ENV BOOST_ROOT $ROSE_BASE/boost
 
-RUN apt-get install unzip
+####################################################################################################
+# Dependencies
+####################################################################################################
 
-ADD ./parts/3-zgrviewer.sh ./3-zgrviewer.sh
-RUN chmod +x ./3-zgrviewer.sh
-RUN ./3-zgrviewer.sh
+ENV DEPS git wget build-essential libtool automake flex bison python3-dev unzip gcc-4.9 g++-4.9 ghostscript
 
-ADD ./parts/4-dlib.sh ./4-dlib.sh
-RUN chmod +x ./4-dlib.sh
+RUN apt-get update \
+ && apt-get -y upgrade \
+ && apt-get -y install $DEPS \
+ && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 100 \
+ && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100 \
+ && apt-get clean
 
-ADD ./parts/5-bash.sh ./5-bash.sh
-RUN chmod +x ./5-bash.sh
-RUN ./5-bash.sh
+WORKDIR $ROSE_BASE
 
-ADD ./parts/6-rose-clone.sh ./6-rose-clone.sh
-RUN chmod +x ./6-rose-clone.sh
-RUN ./6-rose-clone.sh
+####################################################################################################
+# Boost
+####################################################################################################
 
-RUN apt-get install -y ghostscript
+ADD ./boost.sh ./boost.sh
+RUN chmod +x ./boost.sh
+RUN ./boost.sh
 
-ADD ./parts/7-rose-build.sh ./7-rose-build.sh
-RUN chmod +x ./7-rose-build.sh
-RUN ./7-rose-build.sh
+####################################################################################################
+# Rose source
+####################################################################################################
 
-# RUN rm ./1-deps.sh
-# RUN rm ./2-boost.sh
-# RUN rm ./3-zgrviewer.sh
-# RUN rm ./4-dlib.sh
-# RUN rm ./5-bash.sh
-# RUN rm ./6-rose-clone.sh
-# RUN rm ./7-rose-build.sh
+RUN git clone https://github.com/rose-compiler/rose-develop $ROSE_SOURCE --depth 1 \
+ && cd $ROSE_SOURCE \
+ && ./build
+
+ENV CC /usr/bin/gcc-4.9
+ENV CXX g++-4.9
+ENV CXXFLAGS -g -rdynamic -Wall -Wno-unused-local-typedefs -Wno-attributes
+
+RUN $ROSE_SOURCE/configure \
+      --enable-assertion-behavior=abort \
+      --prefix=$ROSE_INSTALLATION \
+      --with-CFLAGS=-fPIC \
+      --with-CXXFLAGS=-fPIC \
+      --with-C_OPTIMIZE=-O0 \
+      --with-CXX_OPTIMIZE=-O0 \
+      --with-C_DEBUG='-g -rdynamic' \
+      --with-CXX_DEBUG='-g -rdynamic' \
+      --with-C_WARNINGS='-Wall -Wno-unused-local-typedefs -Wno-attributes' \
+      --with-CXX_WARNINGS='-Wall -Wno-unused-local-typedefs -Wno-attributes' \
+      --with-ROSE_LONG_MAKE_CHECK_RULE=yes \
+      --with-boost=$BOOST_ROOT \
+      --without-gfortran \
+      --with-python='/usr/bin/python3' \
+      --without-java \
+      --enable-languages=c,c++ \
+      --enable-projects-directory \
+      --without-doxygen \
+      --without-sqlite3 \
+      --without-libreadline \
+      --without-magic \
+      --without-yaml \
+      --without-wt \
+      --without-yices \
+      --without-pch \
+      --enable-rosehpct \
+      --with-gomp_omp_runtime_library=/usr/lib/gcc/x86_64-linux-gnu/4.9/ \
+      --without-haskell \
+      --enable-edg_version=4.12 \
+ && make install-rose-library
+
+ENV LD_LIBRARY_PATH $ROSE_INSTALLATION/lib:${LD_LIBRARY_PATH}
