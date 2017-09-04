@@ -83,4 +83,12 @@ RUN $ROSE_SOURCE/configure \
       --enable-edg_version=4.12 \
  && make install-rose-library
 
-ENV LD_LIBRARY_PATH $ROSE_INSTALLATION/lib:${LD_LIBRARY_PATH}
+ ENV LD_LIBRARY_PATH $BOOST_ROOT/lib:$ROSE_INSTALLATION/lib:${LD_LIBRARY_PATH}
+
+ ####################################################################################################
+ # IdentityTranslator
+ ####################################################################################################
+
+ RUN git clone https://github.com/laraaydin/rose-project-templates.git
+   && cd rose-project-templates
+   && make
