@@ -98,3 +98,5 @@ RUN apt-get install -y vim && apt-get clean
 RUN git clone https://github.com/laraaydin/rose-project-templates.git  \
  && cd rose-project-templates \
  && make
+
+ENV PATH /rose/rose-project-templates:${PATH}
