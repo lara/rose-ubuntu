@@ -100,3 +100,13 @@ RUN git clone https://github.com/laraaydin/rose-project-templates.git  \
  && make
 
 ENV PATH /rose/rose-project-templates:${PATH}
+
+WORKDIR /rose/exampleTranslators/DOTGenerator
+RUN make
+ENV PATH /rose/exampleTranslators/DOTGenerator:${PATH}
+
+WORKDIR /rose/exampleTranslators/PDFGenerator
+RUN make
+ENV PATH /rose/exampleTranslators/PDFGenerator:${PATH}
+
+WORKDIR /rose
