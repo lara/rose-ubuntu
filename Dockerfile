@@ -91,16 +91,6 @@ ENV LD_LIBRARY_PATH $BOOST_ROOT/lib:$ROSE_INSTALLATION/lib:${LD_LIBRARY_PATH}
 
 RUN apt-get install -y vim && apt-get clean
 
-####################################################################################################
-# IdentityTranslator
-####################################################################################################
-
-RUN git clone https://github.com/laraaydin/rose-project-templates.git  \
- && cd rose-project-templates \
- && make
-
-ENV PATH /rose/rose-project-templates:${PATH}
-
 WORKDIR /rose/exampleTranslators/DOTGenerator
 RUN make
 ENV PATH /rose/exampleTranslators/DOTGenerator:${PATH}
@@ -109,4 +99,20 @@ WORKDIR /rose/exampleTranslators/PDFGenerator
 RUN make
 ENV PATH /rose/exampleTranslators/PDFGenerator:${PATH}
 
+####################################################################################################
+# IdentityTranslator
+####################################################################################################
+
 WORKDIR /rose
+RUN git clone https://github.com/laraaydin/rose-project-templates.git  \
+ && cd rose-project-templates \
+ && make
+
+ENV PATH /rose/rose-project-templates:${PATH}
+
+####################################################################################################
+# Specific for Automating Transactional Transformation of Lock-Free Linked Data Structures
+####################################################################################################
+
+WORKDIR /rose
+RUN git clone https://github.com/SMarioMan/COP4935.git
