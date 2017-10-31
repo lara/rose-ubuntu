@@ -67,7 +67,7 @@ RUN $ROSE_SOURCE/configure \
       --without-gfortran \
       --with-python='/usr/bin/python3' \
       --without-java \
-      --enable-languages=c,c++ \
+      --enable-languages=binaries,c,c++ \
       --enable-projects-directory \
       --without-doxygen \
       --without-sqlite3 \
